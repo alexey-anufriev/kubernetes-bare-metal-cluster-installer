@@ -1,5 +1,11 @@
 # k8s bare metal cluster installer
 
+## DISCLAIMER
+
+NOT INTENDED FOR PRODUCTION USE. For pet projects or testing only.
+
+## Description
+
 `k8s bare metal cluster installer` is intended to help with the installation of the sandbox kubernetes cluster on bare metal infrastructure.
 
 ## Requirements
