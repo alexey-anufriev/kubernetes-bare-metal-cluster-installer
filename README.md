@@ -20,7 +20,7 @@ Installer must be executed locally along with the extra details of the remote ho
 _Note: installer must be executed as root._
 
 ```
-sudo ./k8s-cluster-setup \
+sudo ./k8s-cluster-setup.sh \
     -n <cluster-name> \
     -h <cluster-host> \
     -u <remote-user> \
@@ -42,7 +42,7 @@ sudo ./k8s-cluster-setup \
 
 - `install-updates:true/false` whether to install updates or not.
 
-- `cleanup:true/false` whether to perform post-install cleanup or not.
+- `cleanup:true/false` whether to perform post-install cleanup or not (remove installer files).
 
 Every installer execution creates a working directory named after `<cluster-name>-<cluster-host>` where logs and stages progress is saved. Every log file is named after the timestamp of the installation start.
 
