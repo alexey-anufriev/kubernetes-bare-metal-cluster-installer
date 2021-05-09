@@ -19,8 +19,10 @@ if [[ "$MODE" == "master" ]]; then
     kubectl get all --all-namespaces
 
     # Notify workers to join
-    info_log "Now worker nodes can be setup."
-    info_log "To attach worker nodes to the cluster JOIN command (find it above) must be executed every worker node."
+    info_log "Now worker nodes can be setup. Start parallel installers for every worker node."
+    info_log "To attach worker nodes to the cluster JOIN command (find it above) must be executed."
+    info_log "Press any key after all the worker nodes are installed."
+    read
 else
     info_log "Skipping master step for worker mode setup"
 fi
