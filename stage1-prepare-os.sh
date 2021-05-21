@@ -25,6 +25,9 @@ sudo systemctl status docker
 docker ––version
 
 apt-get -y install curl
+apt-get -y install gnupg2
+apt-get -y install software-properties-common
+apt-get -y install snapd
 
 # Set hostname
 hostnamectl set-hostname $4
