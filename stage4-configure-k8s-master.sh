@@ -26,10 +26,18 @@ if [[ "$MODE" == "master" ]]; then
     info_log "Press any [enter] after all the worker nodes are installed."
     read
 
+    # Install ingress
+    info_log "Installing ingress-nginx"
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/ingress-nginx/master/deploy/static/provider/baremetal/deploy.yaml
+    wait_for_pod "ingress-nginx" "app.kubernetes.io/component=controller" "ingress-controller" 50
+
     if [[ -n "$LABEL" ]]; then
         kubectl label nodes $NODE_NAME $LABEL
         info_log "$LABEL label attached to the node"
     fi
+
+    info_log "Cluster status"
+    kubectl get all --all-namespaces
 else
     info_log "Skipping master step for worker mode setup"
 fi

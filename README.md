@@ -11,7 +11,7 @@ NOT INTENDED FOR PRODUCTION USE. For pet projects or testing only.
 ## Requirements
 
 - Ubuntu 16.04+ (local and remote)
-- root access on local and remote machines
+- `sudo` access on remote machines
 
 ## Usage
 
@@ -47,7 +47,7 @@ sudo ./k8s-cluster-setup.sh \
 
 - `node-label` additional node label.
 
-Every installer execution creates a working directory named after `<node-name>-<node-host>` where logs and stages progress is saved. Every log file is named after the timestamp of the installation start.
+Every installer execution creates a working directory named after `.installations/<node-name>-<node-host>` where logs and stages progress is saved. Every log file is named after the timestamp of the installation start.
 
 ## Stages
 
@@ -67,7 +67,7 @@ This stage creates a separate maintenance user on the remote machine. User name 
 
 ### Stage 4 - configure k8s master
 
-This stage initializes kubernetes master node. Important step here is to save `join` command that needs to be executed during workers installation. 
+This stage initializes kubernetes master node. Important step here is to save `join` command that needs to be executed during workers installation. At the end, `kube.config` will be copied to the installation folder.
 
 ### Stage 5 - configure k8s worker
 

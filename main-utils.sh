@@ -18,19 +18,20 @@ usage() {
     echo "./k8s-cluster-setup \\"
     echo "    -n <node-name> \\"
     echo "    -h <node-host> \\"
+    echo "    -m <node-mode:master/worker> \\"
+    echo "    -l <node-label> \\"
     echo "    -u <remote-user> \\"
     echo "    -p <remote-user-password> \\"
-    echo "    -m <node-mode:master/worker> \\"
-    echo "    -i <install-updates:true/false>"
+    echo "    -i <install-updates:true/false> \\"
     echo "    -c <cleanup:true/false>"
-    echo "    -l <node-label>"
 }
 
 check_requirements() {
     info_log "Checking installer requirements..."
 
     check_os
-    check_root_user
+    check_required_software sshpass
+    check_required_software ssh
 
     if [[ "$NODE_MODE" == "worker" ]]; then
         warn_log "Master node must be installed first!"
@@ -98,15 +99,6 @@ parse_args() {
     fi
 
     USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
-}
-
-install_required_software() {
-    info_log "Installing required software..."
-
-    apt-get -y install sshpass
-    apt-get -y install ssh
-
-    info_log "Required software installed"
 }
 
 upload_installer() {
@@ -302,7 +294,6 @@ installation() {
     info_log "Installing node '$NODE_NAME' ($NODE_MODE) on '$REMOTE_HOST'"
 
     check_requirements
-    install_required_software
     upload_installer
 
     exec_stage1_prepare_os

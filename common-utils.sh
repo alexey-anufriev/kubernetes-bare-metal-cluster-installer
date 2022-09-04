@@ -34,6 +34,18 @@ check_os() {
    echo "$OS"
 }
 
+check_required_software() {
+    dpkg -s $1 &> /dev/null
+
+    RESULT=$?
+    if [[ $RESULT -eq 0 ]]; then
+        info_log "'$1' is installed"
+    else
+        error_log "'$1' is required but not installed"
+        exit 1
+    fi
+}
+
 # Check if user is root
 check_root_user() {
     info_log "Checking user..."
