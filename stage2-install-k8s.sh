@@ -15,3 +15,4 @@ helm version
 
 # Disable swap
 swapoff -a
+sed -i '/ swap / s/^/#/' /etc/fstab
