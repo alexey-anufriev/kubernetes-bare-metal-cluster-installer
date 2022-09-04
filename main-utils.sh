@@ -16,11 +16,11 @@ banner() {
 usage() {
     echo "usage:"
     echo "./k8s-cluster-setup \\"
-    echo "    -n <cluster-name> \\"
-    echo "    -h <cluster-host> \\"
+    echo "    -n <node-name> \\"
+    echo "    -h <node-host> \\"
     echo "    -u <remote-user> \\"
     echo "    -p <remote-user-password> \\"
-    echo "    -m <cluster-mode:master/worker> \\"
+    echo "    -m <node-mode:master/worker> \\"
     echo "    -i <install-updates:true/false>"
     echo "    -c <cleanup:true/false>"
     echo "    -l <node-label>"
@@ -32,7 +32,7 @@ check_requirements() {
     check_os
     check_root_user
 
-    if [[ "$CLUSTER_MODE" == "worker" ]]; then
+    if [[ "$NODE_MODE" == "worker" ]]; then
         warn_log "Master node must be installed first!"
         info_log "Please confirm that master node has been already installed: [y/n]"
         read MASTER_INSTALLED
@@ -51,7 +51,7 @@ parse_args() {
     while getopts ":n:h:u:p:m:i:c:" options; do
         case "${options}" in
             n)
-                CLUSTER_NAME=${OPTARG}
+                NODE_NAME=${OPTARG}
             ;;
             h)
                 REMOTE_HOST=${OPTARG}
@@ -63,7 +63,7 @@ parse_args() {
                 REMOTE_PASSWORD=${OPTARG}
             ;;
             m)
-                CLUSTER_MODE=${OPTARG}
+                NODE_MODE=${OPTARG}
             ;;
             i)
                 INSTALL_UPDATES=${OPTARG}
@@ -77,12 +77,12 @@ parse_args() {
         esac
     done
 
-    if [[ -z "$CLUSTER_NAME" || -z "$REMOTE_HOST" || -z "$REMOTE_USER" || -z "$REMOTE_PASSWORD" ]]; then
+    if [[ -z "$NODE_NAME" || -z "$REMOTE_HOST" || -z "$REMOTE_USER" || -z "$REMOTE_PASSWORD" ]]; then
         usage
         exit 1
     fi
 
-    if [[ $CLUSTER_MODE != "master" ]] && [[ $CLUSTER_MODE != "worker" ]]; then
+    if [[ $NODE_MODE != "master" ]] && [[ $NODE_MODE != "worker" ]]; then
         usage
         exit 1
     fi
@@ -149,7 +149,7 @@ exec_stage1_prepare_os() {
         return
     fi
 
-    exec_stage_as_root "os-setup" "stage1-prepare-os.sh" $INSTALL_UPDATES $CLUSTER_NAME
+    exec_stage_as_root "os-setup" "stage1-prepare-os.sh" $INSTALL_UPDATES $NODE_NAME
 
     touch $WORKDIR/stage1-completed
 }
@@ -168,15 +168,15 @@ exec_stage2_install_k8s() {
 generate_and_upload_ssh_key() {
     info_log "Generating ssh keys for maintenance user..."
 
-    mkdir -p $USER_HOME/.ssh/$CLUSTER_NAME
-    ssh-keygen -t rsa -b 4096 -C "$CLUSTER_NAME" -N "" -f $USER_HOME/.ssh/$CLUSTER_NAME/id_rsa -q
-    chown -R $SUDO_USER:$SUDO_USER $USER_HOME/.ssh/$CLUSTER_NAME
+    mkdir -p $USER_HOME/.ssh/$NODE_NAME
+    ssh-keygen -t rsa -b 4096 -C "$NODE_NAME" -N "" -f $USER_HOME/.ssh/$NODE_NAME/id_rsa -q
+    chown -R $SUDO_USER:$SUDO_USER $USER_HOME/.ssh/$NODE_NAME
 
     info_log "Keys generated"
     info_log "Uploading keys..."
 
     sshpass -p $REMOTE_PASSWORD \
-        scp -o "StrictHostKeyChecking no" $USER_HOME/.ssh/$CLUSTER_NAME/id_rsa.pub $REMOTE_USER@$REMOTE_HOST:/k8s-cluster-setup
+        scp -o "StrictHostKeyChecking no" $USER_HOME/.ssh/$NODE_NAME/id_rsa.pub $REMOTE_USER@$REMOTE_HOST:/k8s-cluster-setup
 
     info_log "Keys uploaded"
 }
@@ -184,7 +184,7 @@ generate_and_upload_ssh_key() {
 verify_access() {
     info_log "Verifying maintenance user access..."
 
-    ssh -o "StrictHostKeyChecking no" -i $USER_HOME/.ssh/$CLUSTER_NAME/id_rsa k8s@$REMOTE_HOST "who"
+    ssh -o "StrictHostKeyChecking no" -i $USER_HOME/.ssh/$NODE_NAME/id_rsa k8s@$REMOTE_HOST "who"
 
     RESULT=$?
     if [[ $RESULT -eq 0 ]]; then 
@@ -214,7 +214,7 @@ exec_stage4_configure_master() {
         return
     fi
 
-    exec_stage_as_root "master-configuration" "stage4-configure-k8s-master.sh" $CLUSTER_MODE $CLUSTER_NAME $NODE_LABEL
+    exec_stage_as_root "master-configuration" "stage4-configure-k8s-master.sh" $NODE_MODE $NODE_NAME $NODE_LABEL
 
     touch $WORKDIR/stage4-completed
 }
@@ -225,7 +225,7 @@ exec_stage5_configure_worker() {
         return
     fi
 
-    exec_stage_as_root "worker-configuration" "stage5-configure-k8s-worker.sh" $CLUSTER_MODE $CLUSTER_NAME $NODE_LABEL
+    exec_stage_as_root "worker-configuration" "stage5-configure-k8s-worker.sh" $NODE_MODE $NODE_NAME $NODE_LABEL
 
     touch $WORKDIR/stage5-completed
 }
@@ -236,7 +236,7 @@ exec_stage6_deploy_demo_app() {
         return
     fi
 
-    exec_stage_as_root "deploy-demo-app" "stage6-deploy-demo-app.sh" $CLUSTER_MODE
+    exec_stage_as_root "deploy-demo-app" "stage6-deploy-demo-app.sh" $NODE_MODE
 
     touch $WORKDIR/stage6-completed
 }
@@ -247,13 +247,13 @@ exec_stage7_disable_root() {
         return
     fi
 
-    exec_stage_as_root "disable-root-access" "stage7-disable-root-access.sh" $CLUSTER_MODE $CLEANUP
+    exec_stage_as_root "disable-root-access" "stage7-disable-root-access.sh" $NODE_MODE $CLEANUP
 
     touch $WORKDIR/stage7-completed
 }
 
 add_local_ssh_config() {
-    info_log "Creating local ssh config for $CLUSTER_NAME..."
+    info_log "Creating local ssh config for $NODE_NAME..."
 
     if [[ ! -f $USER_HOME/.ssh/config ]]; then
         touch $USER_HOME/.ssh/config
@@ -261,22 +261,22 @@ add_local_ssh_config() {
         chown -R $SUDO_USER:$SUDO_USER $USER_HOME/.ssh/config
     fi
 
-    if [[ -z "$(grep '^Host '$CLUSTER_NAME $USER_HOME/.ssh/config)" ]]; then
+    if [[ -z "$(grep '^Host '$NODE_NAME $USER_HOME/.ssh/config)" ]]; then
         echo "" >> $USER_HOME/.ssh/config
-        echo "Host $CLUSTER_NAME" >> $USER_HOME/.ssh/config
+        echo "Host $NODE_NAME" >> $USER_HOME/.ssh/config
         echo "    HostName $REMOTE_HOST" >> $USER_HOME/.ssh/config
         echo "    User k8s" >> $USER_HOME/.ssh/config
-        echo "    IdentityFile $USER_HOME/.ssh/$CLUSTER_NAME/id_rsa" >> $USER_HOME/.ssh/config
+        echo "    IdentityFile $USER_HOME/.ssh/$NODE_NAME/id_rsa" >> $USER_HOME/.ssh/config
 
-        info_log "Use 'ssh $CLUSTER_NAME' to connect to $CLUSTER_NAME cluster"
+        info_log "Use 'ssh $NODE_NAME' to connect to $NODE_NAME node"
     else
-        warn_log "Unable to create ssh config for $CLUSTER_NAME"
-        warn_log "$USER_HOME/.ssh/config has already record for host $CLUSTER_NAME"
+        warn_log "Unable to create ssh config for $NODE_NAME"
+        warn_log "$USER_HOME/.ssh/config has already record for host $NODE_NAME"
     fi
 }
 
 prepare_installer_workdir() {
-    WORKDIR=$CLUSTER_NAME'-'$REMOTE_HOST
+    WORKDIR=$NODE_NAME'-'$REMOTE_HOST
     LOG_FILE=$WORKDIR/$(date +'%d-%m-%Y_%H-%M-%S').log
 
     if [[ -f $LOG_FILE ]]; then
@@ -294,7 +294,7 @@ prepare_installer_workdir() {
 }
 
 installation() {
-    info_log "Installing cluster '$CLUSTER_NAME' ($CLUSTER_MODE) on '$REMOTE_HOST'"
+    info_log "Installing node '$NODE_NAME' ($NODE_MODE) on '$REMOTE_HOST'"
 
     check_requirements
     install_required_software
@@ -312,6 +312,6 @@ installation() {
 
     END_TIME=$(date +%s)
 
-    info_log "'$CLUSTER_NAME' installation complete"
+    info_log "'$NODE_NAME' node installation complete"
     info_log "Installation took $((END_TIME-START_TIME)) seconds"
 }

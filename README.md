@@ -21,30 +21,33 @@ _Note: installer must be executed as root._
 
 ```
 sudo ./k8s-cluster-setup.sh \
-    -n <cluster-name> \
-    -h <cluster-host> \
+    -n <node-name> \
+    -h <node-host> \
     -u <remote-user> \
     -p <remote-user-password> \
-    -m <cluster-mode:master/worker> \
+    -m <node-mode:master/worker> \
     -i <install-updates:true/false> \
-    -c <cleanup:true/false>
+    -c <cleanup:true/false> \
+    -l <node-label>
 ```
 
-- `cluster-name` desired name of the cluster. Will be used to set a hostname of the remote machine, as well as hostname of the local SSH configuration (for maintenance access).
+- `node-name` desired name of the node. Will be used to set a hostname of the remote machine, as well as hostname of the local SSH configuration (for maintenance access).
 
-- `cluster-host` remote server host where the node must be installed.
+- `node-host` remote server host where the node must be installed.
 
 - `remote-user` root user name for remote access.
 
 - `remote-user-password` root user password for remote access.
 
-- `cluster-mode:master/worker` k8s node role (either master or worker).
+- `node-mode:master/worker` k8s node role (either master or worker).
 
 - `install-updates:true/false` whether to install updates or not.
 
 - `cleanup:true/false` whether to perform post-install cleanup or not (remove installer files).
 
-Every installer execution creates a working directory named after `<cluster-name>-<cluster-host>` where logs and stages progress is saved. Every log file is named after the timestamp of the installation start.
+- `node-label` additional node label.
+
+Every installer execution creates a working directory named after `<node-name>-<node-host>` where logs and stages progress is saved. Every log file is named after the timestamp of the installation start.
 
 ## Stages
 
@@ -68,7 +71,7 @@ This stage initializes kubernetes master node. Important step here is to save `j
 
 ### Stage 5 - configure k8s worker
 
-This stage joins kubernetes worker node to the kubernetes master node to form the cluster. It is more manual step and requires `join` command that was generated on the previous stage for mater node.
+This stage joins kubernetes worker node to the kubernetes master node. It is more manual step and requires `join` command that was generated on the previous stage for mater node.
 
 ### Stage 6 - demo app
 

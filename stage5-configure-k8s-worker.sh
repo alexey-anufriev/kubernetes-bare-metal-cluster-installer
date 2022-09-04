@@ -3,7 +3,7 @@
 source $(dirname $0)/common-utils.sh
 
 MODE=$3
-CLUSTER_NAME=$4
+NODE_NAME=$4
 LABEL=$5
 
 if [[ "$MODE" == "worker" ]]; then
@@ -16,7 +16,7 @@ if [[ "$MODE" == "worker" ]]; then
     eval "$JOIN_CMD"
 
     if [[ -n "$LABEL" ]]; then
-        kubectl label nodes $CLUSTER_NAME $LABEL
+        kubectl label nodes $NODE_NAME $LABEL
         info_log "$LABEL label attached to the node"
     fi
 else
