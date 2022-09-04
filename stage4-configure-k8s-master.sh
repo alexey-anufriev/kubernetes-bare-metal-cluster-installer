@@ -23,7 +23,7 @@ if [[ "$MODE" == "master" ]]; then
     # Notify workers to join
     info_log "Now worker nodes can be setup. Start parallel installers for every worker node."
     info_log "To attach worker nodes to the cluster JOIN command (find it above) must be executed."
-    info_log "Press any key after all the worker nodes are installed."
+    info_log "Press any [enter] after all the worker nodes are installed."
     read
 
     if [[ -n "$LABEL" ]]; then

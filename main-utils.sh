@@ -216,6 +216,11 @@ exec_stage4_configure_master() {
 
     exec_stage_as_root "master-configuration" "stage4-configure-k8s-master.sh" $NODE_MODE $NODE_NAME $NODE_LABEL
 
+    if [[ "$NODE_MODE" == "master" ]]; then
+        sshpass -p $REMOTE_PASSWORD \
+            scp -o "StrictHostKeyChecking no" $REMOTE_USER@$REMOTE_HOST:/etc/kubernetes/admin.conf $WORKDIR/kube.config
+    fi
+
     touch $WORKDIR/stage4-completed
 }
 
@@ -276,7 +281,7 @@ add_local_ssh_config() {
 }
 
 prepare_installer_workdir() {
-    WORKDIR=$NODE_NAME'-'$REMOTE_HOST
+    WORKDIR=".installations/"$NODE_NAME'-'$REMOTE_HOST
     LOG_FILE=$WORKDIR/$(date +'%d-%m-%Y_%H-%M-%S').log
 
     if [[ -f $LOG_FILE ]]; then
