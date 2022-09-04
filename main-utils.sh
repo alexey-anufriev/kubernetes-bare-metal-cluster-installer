@@ -48,7 +48,7 @@ check_requirements() {
 
 parse_args() {
     # Parse and validate arguments
-    while getopts ":n:h:u:p:m:i:c:" options; do
+    while getopts ":n:h:u:p:m:i:c:l:" options; do
         case "${options}" in
             n)
                 NODE_NAME=${OPTARG}
