@@ -3,6 +3,8 @@
 source $(dirname $0)/common-utils.sh
 
 MODE=$3
+CLUSTER_NAME=$4
+LABEL=$5
 
 if [[ "$MODE" == "master" ]]; then
     # Configure k8s on master
@@ -23,6 +25,11 @@ if [[ "$MODE" == "master" ]]; then
     info_log "To attach worker nodes to the cluster JOIN command (find it above) must be executed."
     info_log "Press any key after all the worker nodes are installed."
     read
+
+    if [[ -n "$LABEL" ]]; then
+        kubectl label nodes $CLUSTER_NAME $LABEL
+        info_log "$LABEL label attached to the node"
+    fi
 else
     info_log "Skipping master step for worker mode setup"
 fi

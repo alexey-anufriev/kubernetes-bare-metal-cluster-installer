@@ -23,6 +23,7 @@ usage() {
     echo "    -m <cluster-mode:master/worker> \\"
     echo "    -i <install-updates:true/false>"
     echo "    -c <cleanup:true/false>"
+    echo "    -l <node-label>"
 }
 
 check_requirements() {
@@ -69,6 +70,9 @@ parse_args() {
             ;;
             c)
                 CLEANUP=${OPTARG}
+            ;;
+            l)
+                NODE_LABEL=${OPTARG}
             ;;
         esac
     done
@@ -210,7 +214,7 @@ exec_stage4_configure_master() {
         return
     fi
 
-    exec_stage_as_root "master-configuration" "stage4-configure-k8s-master.sh" $CLUSTER_MODE
+    exec_stage_as_root "master-configuration" "stage4-configure-k8s-master.sh" $CLUSTER_MODE $CLUSTER_NAME $NODE_LABEL
 
     touch $WORKDIR/stage4-completed
 }
@@ -221,7 +225,7 @@ exec_stage5_configure_worker() {
         return
     fi
 
-    exec_stage_as_root "worker-configuration" "stage5-configure-k8s-worker.sh" $CLUSTER_MODE
+    exec_stage_as_root "worker-configuration" "stage5-configure-k8s-worker.sh" $CLUSTER_MODE $CLUSTER_NAME $NODE_LABEL
 
     touch $WORKDIR/stage5-completed
 }
