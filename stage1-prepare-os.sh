@@ -22,7 +22,7 @@ apt-get -y install docker.io
 sudo systemctl enable docker
 sudo systemctl start docker
 sudo systemctl status docker
-docker ––version
+docker --version
 
 apt-get -y install curl
 apt-get -y install gnupg2
