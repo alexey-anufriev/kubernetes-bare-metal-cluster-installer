@@ -5,6 +5,8 @@ source $(dirname $0)/common-utils.sh
 MODE=$3
 NODE_NAME=$4
 LABEL=$5
+OBSERVABILITY_STACK=$6
+OBSERVABILITY_STACK_NODE_SELECTOR=$7
 
 if [[ "$MODE" == "master" ]]; then
     # Configure k8s on master
@@ -34,6 +36,21 @@ if [[ "$MODE" == "master" ]]; then
     if [[ -n "$LABEL" ]]; then
         kubectl label nodes $NODE_NAME $LABEL
         info_log "$LABEL label attached to the node"
+    fi
+
+    if [[ "$OBSERVABILITY_STACK" == "true" ]]; then
+        kubectl create namespace monitoring
+
+        noglob helm install monitoring \
+            --set namespaceOverride=monitoring \
+            --set operator.nodeSelector.$OBSERVABILITY_STACK_NODE_SELECTOR \
+            --set prometheus.nodeSelector.$OBSERVABILITY_STACK_NODE_SELECTOR \
+            --set alertmanager.nodeSelector.$OBSERVABILITY_STACK_NODE_SELECTOR \
+            --set blackboxExporter.nodeSelector.$OBSERVABILITY_STACK_NODE_SELECTOR \
+            --set kube-state-metrics.nodeSelector.$OBSERVABILITY_STACK_NODE_SELECTOR \
+            --set node-exporter.tolerations[0].operator=Exists \
+            --set node-exporter.tolerations[0].effect=NoSchedule \
+            bitnami/kube-prometheus
     fi
 
     info_log "Cluster status"

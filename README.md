@@ -23,29 +23,26 @@ _Note: installer must be executed as root._
 sudo ./k8s-cluster-setup.sh \
     -n <node-name> \
     -h <node-host> \
+    -m <node-mode:master/worker> \
+    -l <node-label> \
     -u <remote-user> \
     -p <remote-user-password> \
-    -m <node-mode:master/worker> \
     -i <install-updates:true/false> \
-    -c <cleanup:true/false> \
-    -l <node-label>
+    -o <observability-stack:true/false> \
+    -ons <observability-stack-node-selector> \
+    -c <cleanup:true/false>
 ```
 
-- `node-name` desired name of the node. Will be used to set a hostname of the remote machine, as well as hostname of the local SSH configuration (for maintenance access).
-
-- `node-host` remote server host where the node must be installed.
-
-- `remote-user` root user name for remote access.
-
-- `remote-user-password` root user password for remote access.
-
-- `node-mode:master/worker` k8s node role (either master or worker).
-
-- `install-updates:true/false` whether to install updates or not.
-
-- `cleanup:true/false` whether to perform post-install cleanup or not (remove installer files).
-
-- `node-label` additional node label.
+- `node-name` (mandatory) desired name of the node. Will be used to set a hostname of the remote machine, as well as hostname of the local SSH configuration (for maintenance access).
+- `node-host` (mandatory) remote server host where the node must be installed.
+- `node-mode:master/worker` (mandatory) k8s node role (either master or worker).
+- `node-label` (optional) additional node label.
+- `remote-user` (mandatory) user name for remote access with sudo permissions.
+- `remote-user-password` (mandatory) user password for remote access with sudo permissions.
+- `install-updates:true/false` (optional, default: false) whether to install updates or not.
+- `observability-stack:true/false` (optional, default: false) whether to install prometeus, node-exporter and kube-state-metrics.
+- `observability-stack-node-selector` (mandatory if `observability-stack=true`) target node selector for observability stack.
+- `cleanup:true/false` (optional, default: false) whether to perform post-install cleanup or not (remove installer files).
 
 Every installer execution creates a working directory named after `.installations/<node-name>-<node-host>` where logs and stages progress is saved. Every log file is named after the timestamp of the installation start.
 
@@ -67,7 +64,7 @@ This stage creates a separate maintenance user on the remote machine. User name 
 
 ### Stage 4 - configure k8s master
 
-This stage initializes kubernetes master node. Important step here is to save `join` command that needs to be executed during workers installation. At the end, `kube.config` will be copied to the installation folder.
+This stage initializes kubernetes master node. Important step here is to save `join` command that needs to be executed during workers installation. Additionally observability stack may be installed if required. At the end, `kube.config` will be copied to the installation folder.
 
 ### Stage 5 - configure k8s worker
 

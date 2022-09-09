@@ -23,6 +23,8 @@ usage() {
     echo "    -u <remote-user> \\"
     echo "    -p <remote-user-password> \\"
     echo "    -i <install-updates:true/false> \\"
+    echo "    -o <observability-stack:true/false> \\"
+    echo "    -ons <observability-stack-node-selector> \\"
     echo "    -c <cleanup:true/false>"
 }
 
@@ -75,25 +77,29 @@ parse_args() {
             l)
                 NODE_LABEL=${OPTARG}
             ;;
+            o)
+                OBSERVABILITY_STACK=${OPTARG}
+            ;;
+            ons)
+                OBSERVABILITY_STACK_NODE_SELECTOR=${OPTARG}
+            ;;
         esac
     done
 
     if [[ -z "$NODE_NAME" || -z "$REMOTE_HOST" || -z "$REMOTE_USER" || -z "$REMOTE_PASSWORD" ]]; then
+        error_log "Desired node-name and target node environment along with credentials must be specified"
         usage
         exit 1
     fi
 
     if [[ $NODE_MODE != "master" ]] && [[ $NODE_MODE != "worker" ]]; then
+        error_log "Node mode must be specified correctly"
         usage
         exit 1
     fi
 
-    if [[ $INSTALL_UPDATES != "true" ]] && [[ $INSTALL_UPDATES != "false" ]]; then
-        usage
-        exit 1
-    fi
-
-    if [[ $CLEANUP != "true" ]] && [[ $CLEANUP != "false" ]]; then
+    if [[ $OBSERVABILITY_STACK == "true" ]] && [[ -z $OBSERVABILITY_STACK_NODE_SELECTOR ]]; then
+        error_log "When observability stack is required then target node selector must be specified, format is '\"label\"=value'"
         usage
         exit 1
     fi
@@ -206,7 +212,7 @@ exec_stage4_configure_master() {
         return
     fi
 
-    exec_stage_as_root "master-configuration" "stage4-configure-k8s-master.sh" $NODE_MODE $NODE_NAME $NODE_LABEL
+    exec_stage_as_root "master-configuration" "stage4-configure-k8s-master.sh" $NODE_MODE $NODE_NAME $NODE_LABEL $OBSERVABILITY_STACK $OBSERVABILITY_STACK_NODE_SELECTOR
 
     if [[ "$NODE_MODE" == "master" ]]; then
         sshpass -p $REMOTE_PASSWORD \
