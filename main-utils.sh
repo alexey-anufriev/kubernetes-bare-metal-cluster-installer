@@ -24,7 +24,7 @@ usage() {
     echo "    -p <remote-user-password> \\"
     echo "    -i <install-updates:true/false> \\"
     echo "    -o <observability-stack:true/false> \\"
-    echo "    -ons <observability-stack-node-selector> \\"
+    echo "    -s <observability-stack-node-selector> \\"
     echo "    -c <cleanup:true/false>"
 }
 
@@ -51,7 +51,7 @@ check_requirements() {
 
 parse_args() {
     # Parse and validate arguments
-    while getopts ":n:h:u:p:m:i:c:l:" options; do
+    while getopts ":n:h:u:p:m:i:c:l:o:s:" options; do
         case "${options}" in
             n)
                 NODE_NAME=${OPTARG}
@@ -80,7 +80,7 @@ parse_args() {
             o)
                 OBSERVABILITY_STACK=${OPTARG}
             ;;
-            ons)
+            s)
                 OBSERVABILITY_STACK_NODE_SELECTOR=${OPTARG}
             ;;
         esac

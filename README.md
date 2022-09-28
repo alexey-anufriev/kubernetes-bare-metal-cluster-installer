@@ -29,7 +29,7 @@ sudo ./k8s-cluster-setup.sh \
     -p <remote-user-password> \
     -i <install-updates:true/false> \
     -o <observability-stack:true/false> \
-    -ons <observability-stack-node-selector> \
+    -s <observability-stack-node-selector> \
     -c <cleanup:true/false>
 ```
 
