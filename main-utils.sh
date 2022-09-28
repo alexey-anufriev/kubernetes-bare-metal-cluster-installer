@@ -169,7 +169,6 @@ generate_and_upload_ssh_key() {
 
     mkdir -p $USER_HOME/.ssh/$NODE_NAME
     ssh-keygen -t rsa -b 4096 -C "$NODE_NAME" -N "" -f $USER_HOME/.ssh/$NODE_NAME/id_rsa -q
-    chown -R $SUDO_USER:$SUDO_USER $USER_HOME/.ssh/$NODE_NAME
 
     info_log "Keys generated"
     info_log "Uploading keys..."
@@ -262,7 +261,6 @@ add_local_ssh_config() {
     if [[ ! -f $USER_HOME/.ssh/config ]]; then
         touch $USER_HOME/.ssh/config
         chmod 600 $USER_HOME/.ssh/config
-        chown -R $SUDO_USER:$SUDO_USER $USER_HOME/.ssh/config
     fi
 
     if [[ -z "$(grep '^Host '$NODE_NAME $USER_HOME/.ssh/config)" ]]; then
@@ -289,12 +287,10 @@ prepare_installer_workdir() {
     fi
 
     if [[ ! -d $WORKDIR ]]; then
-        mkdir $WORKDIR
+        mkdir -p $WORKDIR
     fi
 
     touch $LOG_FILE
-
-    chown -R $SUDO_USER:$SUDO_USER $WORKDIR
 }
 
 installation() {
