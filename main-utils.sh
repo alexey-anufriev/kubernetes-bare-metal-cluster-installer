@@ -104,7 +104,8 @@ parse_args() {
         exit 1
     fi
 
-    USER_HOME=$(getent passwd $SUDO_USER | cut -d: -f6)
+    CURRENT_USER=$(whoami)
+    USER_HOME=$(getent passwd $CURRENT_USER | cut -d: -f6)
 }
 
 upload_installer() {
