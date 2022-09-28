@@ -26,7 +26,7 @@ if [[ "$MODE" == "master" ]]; then
     info_log "Now worker nodes can be setup. Start parallel installers for every worker node."
     info_log "To attach worker nodes to the cluster JOIN command must be executed (find above, it starts with: kubeadm join ...)."
     info_log "Just copy the command and paste it as-is during the worker installations when requested."
-    info_log "Press any [enter] after all the worker nodes are installed and joined the master node."
+    info_log "Press [enter] after all the worker nodes are installed and joined the master node."
     read
 
     # Install ingress
