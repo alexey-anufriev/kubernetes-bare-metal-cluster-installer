@@ -16,7 +16,7 @@ if [[ "$MODE" == "worker" ]]; then
     eval "$JOIN_CMD"
 
     if [[ -n "$LABEL" ]]; then
-        kubectl label nodes $NODE_NAME $LABEL
+        kubectl label nodes $NODE_NAME $LABEL --kubeconfig=/etc/kubernetes/kubelet.conf
         info_log "$LABEL label attached to the node"
     fi
 else
